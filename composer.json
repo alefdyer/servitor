@@ -2,7 +2,7 @@
     "name": "asinosoft/servitor",
     "type": "project",
     "description": "Background service for VpnForDummies clients and admins.",
-    "license": "GPL-3.0 license",
+    "license": "GPL-3.0-or-later",
     "require": {
         "php": "^8.2",
         "inertiajs/inertia-laravel": "^1.0",
