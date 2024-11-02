@@ -1,0 +1,30 @@
+@startuml Покупка подписки
+actor Клиент as client
+participant Приложение as app
+participant "YooKassa SDS" as sdk
+participant api
+participant ЮKassa as kassa
+
+activate app
+client -> app: Оформить подписку
+app -> api: POST /subscription
+activate api
+app <- api: {price: 300, length: 12 monthes}
+app -> sdk: startTokenize
+app <- sdk: token
+app -> api: POST /payment/token
+api -> kassa: POST /payments
+api <- kassa: {id}
+app <- api: {confirmation_url}
+app -> sdk: {confirmation_url}
+client <- sdk: Подтверждение оплаты
+client -> sdk: Подтверждение платежа
+app <- sdk: paid
+app -> api: PUT /payments/{id}
+api -> kassa: GET /payments/{id}
+api <- kassa: {payment}
+app <-- api: {success}
+deactivate api
+client <-- app: {success}
+deactivate app
+@enduml
