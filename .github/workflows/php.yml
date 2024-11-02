@@ -33,8 +33,7 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Build front
-      run: npm install
-      run: npm run build
+      run: npm install && npm run build
 
     - name: Run test suite
       run: php artisan test
