@@ -1,0 +1,33 @@
+@startuml Подключение устройства по QR
+actor Клиент as client
+participant Телевизор as tv
+participant Телефон as phone
+participant api
+
+client -> tv: Запускает приложение
+activate tv
+client -> tv: Нажимает есть подписка
+client <- tv: Показывет QR с инструкцией
+client -> phone: Подключить устройство к подписке
+
+activate phone
+phone -> phone: Запускает QR-сканнер
+client -> phone: Наводит на QR на телевизоре
+tv -> phone: {QR}
+phone -> api: POST /device
+api -> api: Проверка емкости подписки
+alt #fcc Нет слота
+phone <- api: {error: limit}
+client <- phone: Достигнут максимум устройств на подписке
+end
+api -> api: Подключает устройство к подписке
+tv <- api: PUSH: Уведомление о наличии подписки
+phone <- api: {success}
+return: Устройство подключено
+
+tv -> api: GET /config
+tv <- api: {config}
+tv -> tv: Влючает VPN
+return: OK
+
+@enduml
