@@ -33,6 +33,7 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Build front
+      run: npm install
       run: npm run build
 
     - name: Run test suite
