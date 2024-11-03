@@ -36,7 +36,7 @@ jobs:
       run: npm install && npm run build
 
     - name: Run test suite
-      run: |
-        touch .env
-        php artisan key:generate
-        php artisan test
+      run: php artisan test
+      environment: test
+      env:
+        APP_KEY: ${{ vars.APP_KEY }}
