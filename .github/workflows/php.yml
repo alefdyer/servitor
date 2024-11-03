@@ -36,4 +36,7 @@ jobs:
       run: npm install && npm run build
 
     - name: Run test suite
-      run: php artisan key:generate && php artisan test
+      run: |
+        touch .env
+        php artisan key:generate
+        php artisan test
