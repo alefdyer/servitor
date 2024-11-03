@@ -36,4 +36,4 @@ jobs:
       run: npm install && npm run build
 
     - name: Run test suite
-      run: php artisan test
+      run: php artisan key:generate && php artisan test

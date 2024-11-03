@@ -12,10 +12,12 @@ class GetConfigQuery
 {
     public function __invoke(string $deviceId): Config
     {
-        $totalCapacity = Server::active()->sum('capacity');
+        $totalCapacity = (int) Server::active()->sum('capacity');
         $capacity = random_int(0, $totalCapacity);
         $server = null;
-        foreach (Server::active()->orderBy('RANDOM()')->get()->all() as $server) {
+        $servers = Server::active()->get()->all();
+        shuffle($servers);
+        foreach ($servers as $server) {
             $capacity -= $server->capacity;
             if ($capacity <= 0) {
                 break;
@@ -29,7 +31,7 @@ class GetConfigQuery
         $config = new Config(
             url: $server->url,
             country: $server->country,
-            location: $server->location,
+            location: $server->location ?? 'Unknown',
             breakForAdsInterval: config('api.breakForAdsInterval'),
         );
 
