@@ -9,3 +9,6 @@ migrate:
 
 seed:
 	docker compose exec app php artisan db:seed
+
+test:
+	php artisan test

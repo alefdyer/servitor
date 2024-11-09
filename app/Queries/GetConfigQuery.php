@@ -6,16 +6,35 @@ namespace App\Queries;
 
 use App\Exceptions\ConfigNotFound;
 use App\Models\Config;
+use App\Models\Device;
 use App\Models\Server;
 
 class GetConfigQuery
 {
     public function __invoke(string $deviceId): Config
     {
-        $totalCapacity = (int) Server::active()->sum('capacity');
+        $device = Device::query()->find($deviceId);
+
+        $isPremium = $device && $device->client->subscriptions()->active()->exists();
+
+        $server = $this->getRandomServer($isPremium);
+
+        $config = new Config(
+            url: $server->url,
+            country: $server->country,
+            location: $server->location ?? 'Unknown',
+            breakForAdsInterval: $isPremium ? 0 : config('api.breakForAdsInterval'),
+        );
+
+        return $config;
+    }
+
+    private function getRandomServer(bool $premium): Server
+    {
+        $totalCapacity = (int) Server::active()->premium($premium)->sum('capacity');
         $capacity = random_int(0, $totalCapacity);
         $server = null;
-        $servers = Server::active()->get()->all();
+        $servers = Server::active()->premium($premium)->get()->all();
         shuffle($servers);
         foreach ($servers as $server) {
             $capacity -= $server->capacity;
@@ -24,17 +43,6 @@ class GetConfigQuery
             }
         }
 
-        if (!$server) {
-            throw new ConfigNotFound();
-        }
-
-        $config = new Config(
-            url: $server->url,
-            country: $server->country,
-            location: $server->location ?? 'Unknown',
-            breakForAdsInterval: config('api.breakForAdsInterval'),
-        );
-
-        return $config;
+        return $server ?? throw new ConfigNotFound();
     }
 }
