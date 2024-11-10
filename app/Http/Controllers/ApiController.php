@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateOrderRequest;
+use App\Models\Client;
+use App\Models\Device;
+use App\Models\Values\SubscriptionPeriod;
 use App\Queries\GetConfigQuery;
+use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,6 +17,7 @@ class ApiController
 {
     public function __construct(
         private GetConfigQuery $getConfigQuery,
+        private OrderService $orderService,
     ) {}
 
     public function getVersion(): JsonResponse
@@ -23,8 +29,24 @@ class ApiController
 
     public function getConfig(Request $request): JsonResponse
     {
-        $config = ($this->getConfigQuery)($request->deviceId ?? '');
+        $config = ($this->getConfigQuery)($request->deviceId);
 
         return new JsonResponse($config);
+    }
+
+    public function createOrder(CreateOrderRequest $request): JsonResponse
+    {
+        $client = Device::find($request->deviceId)?->client
+            ?? Client::createByDevice(Device::make(['id' => $request->deviceId, 'model' => $request->deviceModel]));
+
+        if ($client->getActiveSubscription()) {
+            return new JsonResponse(['message' => 'Subscription already active'], 400);
+        }
+
+        $period = SubscriptionPeriod::from($request->period);
+
+        $order = $this->orderService->createOrder($client, $period);
+
+        return new JsonResponse($order);
     }
 }

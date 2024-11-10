@@ -9,8 +9,6 @@ Route::get('/user', fn(Request $request) => $request->user())
 
 Route::get('/config', [ApiController::class, 'getConfig']);
 
-Route::post('/subscription', fn() => '');
-
-Route::post('/device', fn() => '');
+Route::post('/order', [ApiController::class, 'createOrder']);
 
 Route::get('/version', [ApiController::class, 'getVersion']);

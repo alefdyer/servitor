@@ -11,7 +11,7 @@ use App\Models\Server;
 
 class GetConfigQuery
 {
-    public function __invoke(string $deviceId): Config
+    public function __invoke(?string $deviceId = null): Config
     {
         $device = Device::query()->find($deviceId);
 
