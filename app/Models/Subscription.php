@@ -25,11 +25,8 @@ class Subscription extends Model
     protected $fillable = [
         'client',
         'period',
-    ];
-
-    protected $cast = [
-        'start_at' => 'datetime',
-        'end_at' => 'datetime',
+        'start_at',
+        'end_at',
     ];
 
     public function client(): BelongsTo
@@ -43,5 +40,13 @@ class Subscription extends Model
         $query
             ->where('start_at', '<', $now)
             ->where('end_at', '>', $now);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'start_at' => 'datetime',
+            'end_at' => 'datetime',
+        ];
     }
 }

@@ -11,4 +11,6 @@ Route::get('/config', [ApiController::class, 'getConfig']);
 
 Route::post('/order', [ApiController::class, 'createOrder']);
 
+Route::post('/order/{order}/payment', [ApiController::class, 'createPayment']);
+
 Route::get('/version', [ApiController::class, 'getVersion']);

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateOrderRequest;
+use App\Http\Requests\CreatePaymentRequest;
 use App\Models\Client;
 use App\Models\Device;
+use App\Models\Order;
 use App\Models\Values\SubscriptionPeriod;
 use App\Queries\GetConfigQuery;
 use App\Services\OrderService;
@@ -48,5 +50,12 @@ class ApiController
         $order = $this->orderService->createOrder($client, $period);
 
         return new JsonResponse($order);
+    }
+
+    public function createPayment(Order $order, CreatePaymentRequest $request): JsonResponse
+    {
+        $payment = $this->orderService->pay($order, $request->token);
+
+        return new JsonResponse($payment);
     }
 }

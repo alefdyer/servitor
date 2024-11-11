@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $id
  * @property string $item
  * @property array $content
+ * @property float $sum
+ * @property string $currency
  * @property ?Payment $payment
  */
 class Order extends Model implements \JsonSerializable
@@ -25,10 +27,6 @@ class Order extends Model implements \JsonSerializable
         'content',
         'sum',
         'currency',
-    ];
-
-    protected $casts = [
-        'content' => 'array',
     ];
 
     public function cancel(): void
@@ -64,6 +62,13 @@ class Order extends Model implements \JsonSerializable
             'content' => $this->content,
             'sum' => $this->sum,
             'currency' => $this->currency,
+        ];
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'content' => 'array',
         ];
     }
 }

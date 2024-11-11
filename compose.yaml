@@ -38,3 +38,11 @@ services:
       - DB_DATABASE=servitor
       - DB_USERNAME=myuser
       - DB_PASSWORD=mypass
+      - YOOKASSA_URL=http://yookassa/
+      - YOOKASSA_SHOP=shop
+      - YOOKASSA_SECRET=secret
+
+  yookassa:
+    image: php
+    entrypoint: php -S 0.0.0.0:80 /usr/src/yookassa.php
+    volumes: [./.docker/yookassa/yookassa.php:/usr/src/yookassa.php]
