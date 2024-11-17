@@ -28,32 +28,27 @@ class OrderService
         return $order;
     }
 
-    public function pay(Order $order, string $token): Payment
+    public function pay(Order $order): Payment
     {
-        Log::info('Pay order', compact('order', 'token'));
+        Log::info('Pay order', compact('order'));
 
         /** @var Payment $payment */
-        $payment = match ($order->payment?->token) {
-            null => $order->payment()->create([
-                'token' => $token,
-                'sum' => $order->sum,
-                'currency' => $order->currency,
-            ]),
+        $payment = $order->payment()->firstOrCreate([
+            'sum' => $order->sum,
+            'currency' => $order->currency,
+        ]);
 
-            $token => $order->payment,
-
-            default => throw new \Exception("Order already paid")
-        };
-
-        if ($payment->status->isPending()) {
-            $this->yooKassaService->send($payment);
-        } elseif ($payment->status->isWaiting()) {
-            $this->yooKassaService->check($payment);
-        } elseif ($payment->status->isFinal()) {
+        if ($payment->status->isFinal()) {
             return $payment;
         }
 
-        // @TODO: Create subscription by OrderPaidEent!
+        if ($payment->status->isNew()) {
+            $this->yooKassaService->send($payment);
+        } else {
+            $this->yooKassaService->check($payment);
+        }
+
+        // @TODO: Create subscription by OrderPaidEvent!
         if ($payment->status->isComplete()) {
             $period = $order->content['period'];
             $order->client->subscriptions()->create([

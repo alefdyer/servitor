@@ -8,16 +8,20 @@ use App\Exceptions\ConfigNotFound;
 use App\Models\Config;
 use App\Models\Device;
 use App\Models\Server;
+use Illuminate\Support\Facades\Log;
 
 class GetConfigQuery
 {
     public function __invoke(?string $deviceId = null): Config
     {
+        Log::info('Configuration request', compact('deviceId'));
         $device = Device::query()->find($deviceId);
 
         $isPremium = $device && $device->client->subscriptions()->active()->exists();
 
         $server = $this->getRandomServer($isPremium);
+
+        Log::info('Configuration selected', compact('deviceId', 'server'));
 
         $config = new Config(
             url: $server->url,

@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateOrderRequest;
-use App\Http\Requests\CreatePaymentRequest;
 use App\Models\Client;
 use App\Models\Device;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Values\SubscriptionPeriod;
 use App\Queries\GetConfigQuery;
 use App\Services\OrderService;
+use App\Services\YooKassaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -20,6 +21,7 @@ class ApiController
     public function __construct(
         private GetConfigQuery $getConfigQuery,
         private OrderService $orderService,
+        private YooKassaService $yooKassaService,
     ) {}
 
     public function getVersion(): JsonResponse
@@ -52,10 +54,24 @@ class ApiController
         return new JsonResponse($order);
     }
 
-    public function createPayment(Order $order, CreatePaymentRequest $request): JsonResponse
+    public function createPayment(Order $order): JsonResponse
     {
-        $payment = $this->orderService->pay($order, $request->token);
+        $payment = $this->orderService->pay($order);
 
         return new JsonResponse($payment);
+    }
+
+    public function checkPayment(Payment $payment): JsonResponse
+    {
+        if (!$payment->status->isFinal()) {
+            $this->yooKassaService->check($payment);
+        }
+
+        return new JsonResponse($payment);
+    }
+
+    public function getPayment(Order $order): JsonResponse
+    {
+        return new JsonResponse($order->payment);
     }
 }

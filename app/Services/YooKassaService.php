@@ -33,7 +33,7 @@ class YooKassaService
 
         Log::debug('YooKassa response', $response);
 
-        $payment->sent($response);
+        $payment->updateByResponse($response);
     }
 
     public function check(Payment $payment): void
@@ -48,17 +48,7 @@ class YooKassaService
 
             Log::debug('YooKassa response', $response);
 
-            $payment->payload = $response;
-            switch ($response['status']) {
-                case 'succeeded':
-                    $payment->complete();
-                    break;
-                case 'canceled':
-                    $payment->cancel();
-                    break;
-                default:
-                    $payment->save();
-            }
+            $payment->updateByResponse($response);
         } else {
             throw new \Exception("Can't check payment without ID");
         }

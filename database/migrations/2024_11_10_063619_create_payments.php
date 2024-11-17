@@ -12,8 +12,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->decimal('sum', 16, 2);
             $table->string('currency', 3)->default('RUB');
-            $table->string('status', 10)->default(PaymentStatus::PENDING);
-            $table->string('token');
+            $table->string('status', 10)->default(PaymentStatus::NEW);
             $table->jsonb('payload')->nullable(true);
             $table->foreignUuid('order_id')->constrained();
             $table->timestamps();

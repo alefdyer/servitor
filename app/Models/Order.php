@@ -62,6 +62,7 @@ class Order extends Model implements \JsonSerializable
             'content' => $this->content,
             'sum' => $this->sum,
             'currency' => $this->currency,
+            'payment' => $this->payment,
         ];
     }
 

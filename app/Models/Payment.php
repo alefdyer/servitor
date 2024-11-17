@@ -30,7 +30,7 @@ class Payment extends Model
     ];
 
     protected $attributes = [
-        'status' => PaymentStatus::PENDING,
+        'status' => PaymentStatus::NEW,
     ];
 
     public function cancel(): void
@@ -53,14 +53,15 @@ class Payment extends Model
         $this->save();
     }
 
-    public function sent(array $response): void
+    public function updateByResponse(array $response): void
     {
-        if (!$this->status->isPending()) {
-            throw new \Exception("Can't send non-pending payment");
-        }
-
         $this->payload = $response;
-        $this->status = PaymentStatus::WAITING;
+        try {
+            $value = $response['status'] === 'waiting_for_capture' ? 'waiting' : $response['status'];
+            $this->status = PaymentStatus::from($value);
+        } catch(\ValueError) {
+            // ignore - don't change status
+        }
         $this->save();
     }
 

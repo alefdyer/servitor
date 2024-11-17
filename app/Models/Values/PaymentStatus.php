@@ -6,6 +6,7 @@ namespace App\Models\Values;
 
 enum PaymentStatus: string
 {
+    case NEW = 'new';
     case PENDING = 'pending'; // Созданный платеж на стадии выбора средства оплаты
     case WAITING = 'waiting'; // Ожидание оплаты
     case COMPLETED = 'completed'; // Оплата проведена
@@ -19,6 +20,11 @@ enum PaymentStatus: string
             self::CANCELED => true,
             default => false
         };
+    }
+
+    public function isNew(): bool
+    {
+        return self::NEW === $this;
     }
 
     public function isPending(): bool

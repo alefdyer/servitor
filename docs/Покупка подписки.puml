@@ -7,21 +7,21 @@ participant ЮKassa as kassa
 
 activate app
 client -> app: Оформить подписку
-app -> api: POST /subscription
+app -> api: POST /order {period}
 activate api
-app <- api: {price: 300, length: 12 monthes}
+app <- api: Order: {sum: 300, content: 12 monthes}
 app -> sdk: startTokenize
 app <- sdk: token
-app -> api: POST /payment/token
+app -> api: POST /order/_id/payment {token}
 api -> kassa: POST /payments
 api <- kassa: {id}
-app <- api: {confirmation_url}
+app <- api: Payment: {sum, confirmation_url}
 app -> sdk: {confirmation_url}
 client <- sdk: Подтверждение оплаты
 client -> sdk: Подтверждение платежа
 app <- sdk: paid
-app -> api: PUT /payments/{id}
-api -> kassa: GET /payments/{id}
+app -> api: POST /payment/_id/check
+api -> kassa: GET /payments/_id
 api <- kassa: {payment}
 app <-- api: {success}
 deactivate api

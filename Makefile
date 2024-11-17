@@ -15,3 +15,6 @@ seed:
 
 test:
 	php artisan test
+
+logs:
+	docker compose logs -f app
