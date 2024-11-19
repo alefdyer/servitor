@@ -61,57 +61,30 @@ function status(): string
 
     $payment = json_decode(<<<JSON
         {
-        "id": "22e12f66-000f-5000-8000-18db351245c7",
-        "status": "waiting_for_capture",
-        "paid": true,
-        "amount": {
-            "value": "2.00",
-            "currency": "RUB"
-        },
-        "authorization_details": {
-            "rrn": "10000000000",
-            "auth_code": "000000",
-            "three_d_secure": {
-            "applied": true
-            }
-        },
-        "created_at": "2018-07-18T10:51:18.139Z",
-        "description": "Заказ №72",
-        "expires_at": "2018-07-25T10:52:00.233Z",
-        "metadata": {},
-        "payment_method": {
-            "type": "bank_card",
-            "id": "22e12f66-000f-5000-8000-18db351245c7",
-            "saved": false,
-            "card": {
-            "first6": "555555",
-            "last4": "4444",
-            "expiry_month": "07",
-            "expiry_year": "2022",
-            "card_type": "Mir",
-            "card_product": {
-                "code": "MCP",
-                "name": "MIR Privilege"
+            "id": "23d93cac-000f-5000-8000-126628f15141",
+            "status": "pending",
+            "paid": false,
+            "amount": {
+                "value": "100.00",
+                "currency": "RUB"
             },
-            "issuer_country": "RU",
-            "issuer_name": "Sberbank"
+            "confirmation": {
+                "type": "redirect",
+                "confirmation_url": "https://asinosoft.ru/vpn.html"
             },
-            "title": "Bank card *4444"
-        },
-        "recipient": {
-            "account_id": "100500",
-            "gateway_id": "100700"
-        },
-        "refundable": false,
-        "test": false,
-        "income_amount": {
-            "value": "1.97",
-            "currency": "RUB"
-        }
+            "created_at": "2019-01-22T14:30:45.129Z",
+            "description": "Заказ №1",
+            "metadata": {},
+            "recipient": {
+                "account_id": "100500",
+                "gateway_id": "100700"
+            },
+            "refundable": false,
+            "test": false
         }
     JSON);
 
-    $payment->id = $payment->payment_method->id = $paymentId;
+    $payment->id = $paymentId;
     $payment->status = ['waiting_for_capture', 'succeeded', 'canceled'][random_int(0, 2)];
 
     return json_encode($payment);

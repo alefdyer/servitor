@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\YooKassaController;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/yookassa/notify', [YooKassaController::class, 'notify']);
 
 Route::get('/user', fn(Request $request) => $request->user())
     ->middleware('auth:sanctum');

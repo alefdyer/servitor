@@ -19,20 +19,33 @@ class YooKassaService
         Log::debug('YooKassa send', [$payment]);
 
         $response = $this->request()
-            ->withHeader('Idempotence-Key', $payment->id)
+            ->withHeader('Idempotence-Key', $payment->order->id)
             ->post('payments', [
-                'payment_token' => $payment->token,
                 'amount' => [
                     'value' => $payment->sum,
                     'currency' => $payment->currency,
+                ],
+                'capture' => false,
+                'confirmation' => [
+                    'type' => 'redirect',
+                    'return_url' => 'https://asinosoft.ru/vpn.html', // @TODO
+                ],
+                'metadata' => [
+                    'client_id' => $payment->order->client->id,
+                    'order_id' => $payment->order->id,
                 ],
                 'description' => "Клиент #{$payment->order->client->id} | Заказ #{$payment->order->id}",
             ])
             ->throw()
             ->json();
 
+        if (!$response) {
+            throw new \Exception('Bad yookassa response');
+        }
+
         Log::debug('YooKassa response', $response);
 
+        $payment->id = $response['id'];
         $payment->updateByResponse($response);
     }
 
@@ -40,18 +53,18 @@ class YooKassaService
     {
         Log::debug('YooKassa check', [$payment]);
 
-        if ($id = $payment->payload['id'] ?? null) {
-            $response = $this->request()
-                ->get("payments/$id")
-                ->throw()
-                ->json();
+        $response = $this->request()
+            ->get("payments/$payment->id")
+            ->throw()
+            ->json();
 
-            Log::debug('YooKassa response', $response);
-
-            $payment->updateByResponse($response);
-        } else {
-            throw new \Exception("Can't check payment without ID");
+        if (!$response) {
+            throw new \Exception('Bad yookassa response');
         }
+
+        Log::debug('YooKassa response', $response);
+
+        $payment->updateByResponse($response);
     }
 
     private function request(): PendingRequest

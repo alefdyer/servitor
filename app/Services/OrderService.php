@@ -33,7 +33,7 @@ class OrderService
         Log::info('Pay order', compact('order'));
 
         /** @var Payment $payment */
-        $payment = $order->payment()->firstOrCreate([
+        $payment = $order->payment()->firstOrNew([
             'sum' => $order->sum,
             'currency' => $order->currency,
         ]);
