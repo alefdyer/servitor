@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Payment;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -18,53 +19,63 @@ class YooKassaService
     {
         Log::debug('YooKassa send', [$payment]);
 
-        $response = $this->request()
-            ->withHeader('Idempotence-Key', $payment->order->id)
-            ->post('payments', [
-                'amount' => [
-                    'value' => $payment->sum,
-                    'currency' => $payment->currency,
-                ],
-                'capture' => false,
-                'confirmation' => [
-                    'type' => 'redirect',
-                    'return_url' => 'https://asinosoft.ru/vpn.html', // @TODO
-                ],
-                'metadata' => [
-                    'client_id' => $payment->order->client->id,
-                    'order_id' => $payment->order->id,
-                ],
-                'description' => "Клиент #{$payment->order->client->id} | Заказ #{$payment->order->id}",
-            ])
-            ->throw()
-            ->json();
+        try {
+            $response = $this->request()
+                ->withHeader('Idempotence-Key', $payment->order->id)
+                ->post('payments', [
+                    'amount' => [
+                        'value' => $payment->sum,
+                        'currency' => $payment->currency,
+                    ],
+                    'capture' => true,
+                    'confirmation' => [
+                        'type' => 'redirect',
+                        'return_url' => 'https://asinosoft.ru/vpn.html', // @TODO
+                    ],
+                    'metadata' => [
+                        'client_id' => $payment->order->client->id,
+                        'order_id' => $payment->order->id,
+                    ],
+                    'description' => "Клиент #{$payment->order->client->id} | Заказ #{$payment->order->id}",
+                ])
+                ->throw()
+                ->json();
 
-        if (!$response) {
-            throw new \Exception('Bad yookassa response');
+            if (!$response) {
+                throw new \Exception('Bad yookassa response');
+            }
+
+            Log::debug('YooKassa response', $response);
+
+            $payment->id = $response['id'];
+            $payment->updateByResponse($response);
+        } catch (RequestException $ex) {
+            Log::error('YooKassa error', $ex->response->json());
+            throw new \Exception('YooKassa error');
         }
-
-        Log::debug('YooKassa response', $response);
-
-        $payment->id = $response['id'];
-        $payment->updateByResponse($response);
     }
 
     public function check(Payment $payment): void
     {
         Log::debug('YooKassa check', [$payment]);
 
-        $response = $this->request()
-            ->get("payments/$payment->id")
-            ->throw()
-            ->json();
+        try {
+            $response = $this->request()
+                ->get("payments/$payment->id")
+                ->throw()
+                ->json();
 
-        if (!$response) {
-            throw new \Exception('Bad yookassa response');
+            if (!$response) {
+                throw new \Exception('Bad yookassa response');
+            }
+
+            Log::debug('YooKassa response', $response);
+
+            $payment->updateByResponse($response);
+        } catch (RequestException $ex) {
+            Log::error('YooKassa error', $ex->response->json());
+            throw new \Exception('YooKassa error');
         }
-
-        Log::debug('YooKassa response', $response);
-
-        $payment->updateByResponse($response);
     }
 
     private function request(): PendingRequest

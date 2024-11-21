@@ -4,20 +4,36 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use App\Services\YooKassaService;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 
-class YooKassaController {
+class YooKassaController
+{
     public function __construct(
         private YooKassaService $yooKassaService,
-    )
+    ) {}
+    public function notify(Request $request)
     {
-    }
-    public function notify(Request $request) {
-        $event = $request->toArray();
-        Log::info('YooKassa event', $event);
+        $notification = $request->toArray();
+        Log::info('YooKassa notification', $notification);
 
-        // @TODO: update payment status
+        if ('notification' !== $notification['type']) {
+            return;
+        }
+
+        @[$type] = explode('.', $notification['event'] ?? '');
+
+        switch ($type) {
+            case 'payment':
+                /** @var Payment $payment */
+                if ($payment = Payment::find($notification['object']['id'] ?? null)) {
+                    $payment->updateByResponse($notification['object']);
+                }
+                break;
+            default:
+                Log::warning("Unknown notification object type: $type");
+        }
     }
 }

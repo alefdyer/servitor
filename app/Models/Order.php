@@ -51,7 +51,7 @@ class Order extends Model implements \JsonSerializable
 
     public function scopePaid(Builder $query): void
     {
-        $query->whereHas('payment', fn(Builder $payment) => $payment->completed());
+        $query->whereHas('payment', fn(Builder $payment) => $payment->succeeded());
     }
 
     public function jsonSerialize(): mixed

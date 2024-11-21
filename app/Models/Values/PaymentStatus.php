@@ -9,14 +9,14 @@ enum PaymentStatus: string
     case NEW = 'new';
     case PENDING = 'pending'; // Созданный платеж на стадии выбора средства оплаты
     case WAITING = 'waiting'; // Ожидание оплаты
-    case COMPLETED = 'completed'; // Оплата проведена
+    case SUCCEEDED = 'succeeded'; // Оплата прошла
     case CANCELED = 'canceled'; // Оптала отмена
     case REFUNDED = 'refunded'; // Оплата позвращена
 
     public function isFinal(): bool
     {
         return match ($this) {
-            self::COMPLETED => true,
+            self::SUCCEEDED => true,
             self::CANCELED => true,
             default => false
         };
@@ -37,8 +37,8 @@ enum PaymentStatus: string
         return self::WAITING === $this;
     }
 
-    public function isComplete(): bool
+    public function isSucceeded(): bool
     {
-        return self::COMPLETED === $this;
+        return self::SUCCEEDED === $this;
     }
 }

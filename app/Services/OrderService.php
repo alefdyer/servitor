@@ -48,23 +48,25 @@ class OrderService
             $this->yooKassaService->check($payment);
         }
 
-        // @TODO: Create subscription by OrderPaidEvent!
-        if ($payment->status->isComplete()) {
-            $period = $order->content['period'];
-            $order->client->subscriptions()->create([
-                'period' => $period,
-                'start_at' => now(),
-                'end_at' => match ($period) {
-                    'day' => now()->addDay(),
-                    'week' => Date::parse('tomorrow')->addWeek(),
-                    'month' => Date::parse('tomorrow')->addMonth(),
-                    'year' => Date::parse('tomorrow')->addYead(),
-                    default => throw new \Exception("Unknown subscription period: $period")
-                },
-            ]);
-        }
-
         return $payment;
+    }
+
+    public function complete(Order $order): void
+    {
+        Log::info('Complete order', compact('order'));
+
+        $period = $order->content['period'];
+        $order->client->subscriptions()->create([
+            'period' => $period,
+            'start_at' => now(),
+            'end_at' => match ($period) {
+                'day' => now()->addDay(),
+                'week' => Date::parse('tomorrow')->addWeek(),
+                'month' => Date::parse('tomorrow')->addMonth(),
+                'year' => Date::parse('tomorrow')->addYead(),
+                default => throw new \Exception("Unknown subscription period: $period")
+            },
+        ]);
     }
 
     private function findExistingOrder(Client $client, SubscriptionPeriod $period): ?Order

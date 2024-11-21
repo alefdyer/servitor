@@ -18,11 +18,11 @@ Route::post('/order', [ApiController::class, 'createOrder']);
 
 Route::post('/order/{order}/payment', [ApiController::class, 'createPayment']);
 
-Route::get('/order/{order}', fn (Order $order) => $order);
+Route::get('/order/{order}', fn(Order $order) => $order);
 
-Route::get('/order/{order}/payment', fn (Order $order) => $order->payment);
+Route::get('/order/{order}/payment', fn(Order $order) => $order->payment);
 
-Route::get('/payment/{payment}', fn (Payment $payment) => $payment);
+Route::get('/payment/{payment}', fn(Payment $payment) => $payment);
 
 Route::post('/payment/{payment}/check', [ApiController::class, 'checkPayment']);
 
