@@ -13,16 +13,23 @@ readonly class Config implements \JsonSerializable
         public string $url,
         public string $country,
         public string $location,
-        public int $breakForAdsInterval,
+        public ?Subscription $subscription = null,
     ) {}
 
     public function jsonSerialize(): mixed
     {
-        return [
+        $json = [
             'url' => $this->url,
             'country' => $this->country,
             'location' => $this->location,
-            'breakForAdsInterval' => $this->breakForAdsInterval,
         ];
+
+        if ($this->subscription) {
+            $json['subscription'] = $this->subscription;
+        } else {
+            $json['breakForAdsInterval'] = config('api.breakForAdsInterval');
+        }
+
+        return $json;
     }
 }

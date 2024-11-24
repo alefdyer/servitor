@@ -10,7 +10,7 @@ use App\Models\Device;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Values\SubscriptionPeriod;
-use App\Queries\GetConfigQuery;
+use App\Services\ConfigService;
 use App\Services\OrderService;
 use App\Services\YooKassaService;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 class ApiController
 {
     public function __construct(
-        private GetConfigQuery $getConfigQuery,
+        private ConfigService $configService,
         private OrderService $orderService,
         private YooKassaService $yooKassaService,
     ) {}
@@ -33,7 +33,9 @@ class ApiController
 
     public function getConfig(Request $request): JsonResponse
     {
-        $config = ($this->getConfigQuery)($request->deviceId);
+        $device = Device::query()->find($request->deviceId);
+
+        $config = $this->configService->getConfigForDevice($device);
 
         return new JsonResponse($config);
     }

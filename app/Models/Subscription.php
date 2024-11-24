@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \DateTime $end_at
  * @property Client $client
  */
-class Subscription extends Model
+class Subscription extends Model implements \JsonSerializable
 {
     use HasFactory;
 
@@ -47,6 +47,15 @@ class Subscription extends Model
         return [
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+        ];
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'period' => $this->period,
+            'startAt' => $this->start_at,
+            'endAt' => $this->end_at,
         ];
     }
 }

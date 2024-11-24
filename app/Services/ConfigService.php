@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Queries;
+namespace App\Services;
 
 use App\Exceptions\ConfigNotFound;
 use App\Models\Config;
@@ -10,24 +10,23 @@ use App\Models\Device;
 use App\Models\Server;
 use Illuminate\Support\Facades\Log;
 
-class GetConfigQuery
+class ConfigService
 {
-    public function __invoke(?string $deviceId = null): Config
+    public function getConfigForDevice(?Device $device = null): Config
     {
-        Log::info('Configuration request', compact('deviceId'));
-        $device = Device::query()->find($deviceId);
+        Log::info('Configuration request', compact('device'));
 
-        $isPremium = $device && $device->client->subscriptions()->active()->exists();
+        $subscription = $device?->client?->subscriptions()->active()->first();
 
-        $server = $this->getRandomServer($isPremium);
+        $server = $this->getRandomServer(null !== $subscription);
 
-        Log::info('Configuration selected', compact('deviceId', 'server'));
+        Log::info('Configuration selected', compact('device', 'server'));
 
         $config = new Config(
             url: $server->url,
             country: $server->country,
             location: $server->location ?? 'Unknown',
-            breakForAdsInterval: $isPremium ? 0 : config('api.breakForAdsInterval'),
+            subscription: $subscription,
         );
 
         return $config;
