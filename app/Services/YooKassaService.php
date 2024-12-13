@@ -22,22 +22,7 @@ class YooKassaService
         try {
             $response = $this->request()
                 ->withHeader('Idempotence-Key', $payment->order->id)
-                ->post('payments', [
-                    'amount' => [
-                        'value' => $payment->sum,
-                        'currency' => $payment->currency,
-                    ],
-                    'capture' => true,
-                    'confirmation' => [
-                        'type' => 'redirect',
-                        'return_url' => 'https://asinosoft.ru/vpn.html', // @TODO
-                    ],
-                    'metadata' => [
-                        'client_id' => $payment->order->client->id,
-                        'order_id' => $payment->order->id,
-                    ],
-                    'description' => "Клиент #{$payment->order->client->id} | Заказ #{$payment->order->id}",
-                ])
+                ->post('payments', $this->getPaymentData($payment))
                 ->throw()
                 ->json();
 
@@ -85,5 +70,49 @@ class YooKassaService
         $secret = config('yookassa.secret');
 
         return Http::withBasicAuth($shop, $secret)->baseUrl($url);
+    }
+
+    private function getPaymentData(Payment $payment): array
+    {
+        $period = match ($payment->order->content['period']) {
+            'day' => '1 день',
+            'week' => '1 неделю',
+            'month' => '1 месяц',
+            'year' => '1 год',
+            default => throw new \Exception("Unknown subscription period {$payment->order->content['period']}")
+        };
+
+        return [
+            'amount' => [
+                'value' => $payment->sum,
+                'currency' => $payment->currency,
+            ],
+            'capture' => true,
+            'confirmation' => [
+                'type' => 'redirect',
+                'return_url' => 'https://asinosoft.ru/vpn.html', // @TODO
+            ],
+            'receipt' => [
+                'customer' => [
+                    'email' => $payment->email,
+                ],
+                'items' => [[
+                    'description' => "Подписка на $period",
+                    'amount' => [
+                        'value' => $payment->sum,
+                        'currency' => $payment->currency,
+                    ],
+                    'vat_code' => 1, // Без НДС
+                    'quantity' => 1,
+                    'payment_subject' => 'service',
+                    'payment_mode' => 'full_payment',
+                ]],
+            ],
+            'metadata' => [
+                'client_id' => $payment->order->client->id,
+                'order_id' => $payment->order->id,
+            ],
+            'description' => "Клиент #{$payment->order->client->id} | Заказ #{$payment->order->id}",
+        ];
     }
 }

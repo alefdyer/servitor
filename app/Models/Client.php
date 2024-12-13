@@ -24,6 +24,11 @@ class Client extends Model
         return $this->hasMany(Device::class);
     }
 
+    public function emails(): HasMany
+    {
+        return $this->hasMany(Email::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);

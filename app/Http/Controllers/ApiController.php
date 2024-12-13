@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateOrderRequest;
+use App\Http\Requests\CreatePaymentRequest;
 use App\Models\Client;
 use App\Models\Device;
 use App\Models\Order;
@@ -56,9 +57,9 @@ class ApiController
         return new JsonResponse($order);
     }
 
-    public function createPayment(Order $order): JsonResponse
+    public function createPayment(Order $order, CreatePaymentRequest $request): JsonResponse
     {
-        $payment = $this->orderService->pay($order);
+        $payment = $this->orderService->pay($order, $request->email);
 
         return new JsonResponse($payment);
     }

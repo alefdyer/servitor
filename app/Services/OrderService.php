@@ -28,7 +28,7 @@ class OrderService
         return $order;
     }
 
-    public function pay(Order $order): Payment
+    public function pay(Order $order, string $email): Payment
     {
         Log::info('Pay order', compact('order'));
 
@@ -36,6 +36,7 @@ class OrderService
         $payment = $order->payment()->firstOrNew([
             'sum' => $order->sum,
             'currency' => $order->currency,
+            'email' => $email,
         ]);
 
         if ($payment->status->isFinal()) {
@@ -63,7 +64,7 @@ class OrderService
                 'day' => now()->addDay(),
                 'week' => Date::parse('tomorrow')->addWeek(),
                 'month' => Date::parse('tomorrow')->addMonth(),
-                'year' => Date::parse('tomorrow')->addYead(),
+                'year' => Date::parse('tomorrow')->addYear(),
                 default => throw new \Exception("Unknown subscription period: $period")
             },
         ]);

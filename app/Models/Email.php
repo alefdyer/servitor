@@ -11,8 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $email
  * @property Client $client
  */
-class Device extends Model
+class Email extends Model
 {
+    protected $primaryKey = 'email';
+
     protected $keyType = 'string';
 
     protected $fillable = [

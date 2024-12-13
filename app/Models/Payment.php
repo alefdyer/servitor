@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
  * @property string $id
  * @property float $sum
  * @property string $currency
+ * @property string $email Имейл для получения электронного чека
  * @property array $payload
  * @property PaymentStatus $status
  */
@@ -29,6 +30,7 @@ class Payment extends Model
         'currency',
         'token',
         'order',
+        'email',
     ];
 
     protected $attributes = [
